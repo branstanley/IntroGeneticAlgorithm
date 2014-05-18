@@ -1,0 +1,8 @@
+This is an intro level Genetic Algorithm written for the purposes of learning.
+
+Currently, the is only partially working.
+
+Required:
+ - Properly weighted selection algorithm.
+ - Full loop process needs to written.
+ - Detection of fitness score = 1, as this is a solution
