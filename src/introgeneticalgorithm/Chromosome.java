@@ -4,15 +4,21 @@ public class Chromosome {
   /***********************************
    * static variables
    ***********************************/
-    static int target = 53;
-    static int strand_size = 20;
+    static int target = 53; // The number we're trying to calculate
+    static int strand_size = 20; // The number of Genes in a Chromosome
     
   /***********************************
    * static functions
    ***********************************/
-    public static void set_strand_size(int size){ strand_size = size; }
-    public static void set_target(int inTarget){ target = inTarget; }
-    public static int get_strand_size(){ return strand_size; }
+    public static void set_strand_size(int size){
+    	strand_size = size; 
+    }
+    public static void set_target(int inTarget){
+    	target = inTarget; 
+	}
+    public static int get_strand_size(){
+    	return strand_size;
+    }
     
   /***********************************
    * member variables
@@ -54,40 +60,55 @@ public class Chromosome {
         /********************************************************************************************************
          * Solves the valid genetic equation. Skips anything that doesn't fit the 3+5*3/2-1 format
          ********************************************************************************************************/
-        double temp = 0;
-        while(current_gene < strand_size && !Character.isDigit(strand[current_gene].get_gene())){ ++current_gene; }
-        if(current_gene >= strand_size)
-            return 0;
+        double current_value = 0;
+        double check_value = 0;
         
-        temp = (double)strand[current_gene].get_gene();
+        if( (current_value = get_next_number()) == -1)
+        	return current_value;
         
-        int i = current_gene;
         while(++current_gene < strand_size){
             if(!Character.isDigit(strand[current_gene].get_gene())){
                 switch(strand[current_gene].get_gene()){
                     case '*':
-                        temp *= get_next_number();
+                    	if( (check_value = get_next_number()) == -1)
+                    		return current_value;
+                        current_value *= check_value;
                         break;
                     case '/':
-                        temp /= get_next_number();
+                    	if( (check_value = get_next_number()) == -1)
+                    		return current_value;
+                        current_value /= current_value;
                         break;
                     case '+':
-                        ++current_gene;
-                        return temp + recursive_solve();
+                        return current_value + recursive_solve();
                     case '-':
-                        ++current_gene;
-                        return temp - recursive_solve();
+                        return current_value - recursive_solve();
                     default:
                         break;
                 }
             }
         }
-        return temp;
+        return current_value;
     }
     
     private double get_next_number(){
-        while(current_gene > strand_size && !Character.isDigit(strand[current_gene].get_gene())){ current_gene++; }
-        return Character.getNumericValue(strand[current_gene].get_gene());
+    	double number_builder;
+    	
+    	// Skip all the garbage (any math operators or blanks at this point)
+        do{
+            if(++current_gene >= strand_size) // Make sure we're not at the end of the Chromosome
+                return -1;
+        }while(!Character.isDigit(strand[current_gene].get_gene()));
+        
+        number_builder = Character.getNumericValue(strand[current_gene].get_gene());
+        
+        // Grab all following numbers to build this number correctly
+        while(++current_gene < strand_size && Character.isDigit(strand[current_gene].get_gene())){
+        	number_builder *= 10;
+        	number_builder += Character.getNumericValue(strand[current_gene].get_gene());
+        }
+        
+        return number_builder;
     }
     
   
