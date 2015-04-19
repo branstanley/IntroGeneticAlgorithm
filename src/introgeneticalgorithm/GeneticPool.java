@@ -11,7 +11,7 @@ public class GeneticPool {
    * member variables
    ***********************************/
     private int pool_size = 100; //number of chromosomes in the pool
-    private Heirarchy_Wrapper [] hierarchy = new Heirarchy_Wrapper[pool_size];
+    private Hierarchy_Wrapper [] hierarchy = new Hierarchy_Wrapper[pool_size];
     private double fitness_pool_size; //current total fitness score, used for making the heriarchy percents
     
   /***********************************
@@ -19,7 +19,7 @@ public class GeneticPool {
    ***********************************/
     public GeneticPool(){
         for(int i = 0; i < pool_size; ++i){
-            hierarchy[i] = new Heirarchy_Wrapper(new Chromosome());
+            hierarchy[i] = new Hierarchy_Wrapper(new Chromosome());
         }
         
         establish_heirarchy();
@@ -28,16 +28,19 @@ public class GeneticPool {
     final public void establish_heirarchy(){
         fitness_pool_size = 0;
         
+        // Add up all the fitnesses
         for(int i = 0; i < pool_size; ++i)
             fitness_pool_size += Math.abs(hierarchy[i].get_chromosome().get_fitness());
         
+        // set up all the percentile sizes
         for(int i = 0; i < pool_size; ++i)
-            hierarchy[i].percent = Math.abs(100 * hierarchy[i].get_chromosome().get_fitness() / fitness_pool_size);
+            hierarchy[i].percent = 100 * Math.abs(hierarchy[i].get_chromosome().get_fitness() / fitness_pool_size);
         
+        // Sort the hierarchy
         for(int i = 0; i < pool_size; ++i){
             for(int j = i; j < pool_size; ++j){
                 if(hierarchy[j].percent > hierarchy[i].percent){
-                    Heirarchy_Wrapper temp = hierarchy[j];
+                    Hierarchy_Wrapper temp = hierarchy[j];
                     hierarchy[j] = hierarchy[i];
                     hierarchy[i] = temp;
                 }
@@ -49,11 +52,9 @@ public class GeneticPool {
      * This is the main driver method for the Genetic Pool
      */
     public void evolution(){
-    	establish_heirarchy();
-    	
-        //grab two random Chromosomes, for evolution
         Chromosome t1, t2;
-        
+
+        //grab two random Chromosomes, for evolution
         t1 = get_chromosome(null);
         t2 = get_chromosome(t1);
         
@@ -105,11 +106,11 @@ public class GeneticPool {
         return hierarchy[i].get_chromosome();
     }
     
-    private class Heirarchy_Wrapper{
+    private class Hierarchy_Wrapper{
         public double percent;  //share of the 100% fitness pool
         private Chromosome chromosome;
         
-        public Heirarchy_Wrapper(Chromosome in){
+        public Hierarchy_Wrapper(Chromosome in){
             chromosome = in;
         }
         

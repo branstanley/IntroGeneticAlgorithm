@@ -44,6 +44,10 @@ public class Chromosome {
             fitness = 1;
             return;
         }
+        else if(Double.isNaN(solution)){
+        	fitness = 0;
+        	return;
+        }
         fitness = 1/(target - solution);
     }
     
@@ -63,10 +67,11 @@ public class Chromosome {
         double current_value = 0;
         double check_value = 0;
         
-        if( (current_value = get_next_number()) == -1)
-        	return current_value;
+        if( (current_value = get_next_number()) == -1){
+        	return 0;
+        }
         
-        while(++current_gene < strand_size){
+        while(current_gene < strand_size){
             if(!Character.isDigit(strand[current_gene].get_gene())){
                 switch(strand[current_gene].get_gene()){
                     case '*':
@@ -74,20 +79,22 @@ public class Chromosome {
                     		return current_value;
                         current_value *= check_value;
                         break;
-                    case '/':
+                    case '/': // DIVIDE BY ZERO ISSUE
                     	if( (check_value = get_next_number()) == -1)
                     		return current_value;
-                        current_value /= current_value;
+                        current_value /= check_value;
                         break;
                     case '+':
-                        return current_value + recursive_solve();
+                        current_value += recursive_solve();
                     case '-':
-                        return current_value - recursive_solve();
+                        current_value -= recursive_solve();
                     default:
                         break;
                 }
             }
+            ++current_gene;
         }
+        
         return current_value;
     }
     
