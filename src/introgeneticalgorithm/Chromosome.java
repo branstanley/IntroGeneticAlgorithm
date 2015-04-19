@@ -4,7 +4,7 @@ public class Chromosome {
   /***********************************
    * static variables
    ***********************************/
-    static int target = 53; // The number we're trying to calculate
+    static double target = 53; // The number we're trying to calculate
     static int strand_size = 20; // The number of Genes in a Chromosome
     
   /***********************************
@@ -48,11 +48,14 @@ public class Chromosome {
         	fitness = 0;
         	return;
         }
+        else if(target - solution == 1){
+        	fitness = 0.6;
+        	return;
+        }
         fitness = 1/(target - solution);
     }
     
     final public double get_fitness(){
-        calculate_fitness();
         return fitness;
     }
     
@@ -60,10 +63,17 @@ public class Chromosome {
         return strand[i];
     }
     
-    private double recursive_solve(){
+    public double recursive_solve(){
+    	return recursive_solve(true);
+    }
+    
+    private double recursive_solve(boolean reset_current_gene){
         /********************************************************************************************************
          * Solves the valid genetic equation. Skips anything that doesn't fit the 3+5*3/2-1 format
          ********************************************************************************************************/
+    	if(reset_current_gene)
+    		current_gene = 0;
+    	
         double current_value = 0;
         double check_value = 0;
         
@@ -79,22 +89,21 @@ public class Chromosome {
                     		return current_value;
                         current_value *= check_value;
                         break;
-                    case '/': // DIVIDE BY ZERO ISSUE
+                    case '/': 
                     	if( (check_value = get_next_number()) == -1)
                     		return current_value;
                         current_value /= check_value;
                         break;
                     case '+':
-                        current_value += recursive_solve();
+                        current_value += recursive_solve(false);
                     case '-':
-                        current_value -= recursive_solve();
+                        current_value -= recursive_solve(false);
                     default:
                         break;
                 }
             }
             ++current_gene;
         }
-        
         return current_value;
     }
     
@@ -114,9 +123,15 @@ public class Chromosome {
         	number_builder *= 10;
         	number_builder += Character.getNumericValue(strand[current_gene].get_gene());
         }
-        
         return number_builder;
     }
     
+    public String get_chromosome_string(){
+    	StringBuilder sb = new StringBuilder();
+    	for(int i = 0; i < strand_size; ++i){
+    		sb.append(strand[i].get_gene());
+    	}
+    	return sb.toString();
+    }
   
 }
