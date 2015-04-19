@@ -1,5 +1,3 @@
-# IntroGeneticAlgorithm
-
 This is an intro level Genetic Algorithm written for the purposes of learning.
 
 This program generates a pool of Chromosomes each with a random strand of Genes.
