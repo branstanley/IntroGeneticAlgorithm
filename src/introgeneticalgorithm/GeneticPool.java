@@ -21,16 +21,26 @@ public class GeneticPool {
         for(int i = 0; i < pool_size; ++i){
             hierarchy[i] = new Hierarchy_Wrapper(new Chromosome());
         }
-        
-        establish_heirarchy();
     }
     
-    final public void establish_heirarchy(){
+    /*
+     * Calls the calculate_fitness function for all Chromosomes, if a fitness score of 1 is found, we return it. 
+     * Otherwise we then establish the current hierarchy of chromosomes, giving them a weighted percent,
+     * and finally sort them by their weighted percents.
+     * 
+     * @return A Chromosome that's fitness is 1, otherwise null
+     */
+    final public Chromosome establish_heirarchy(){
         fitness_pool_size = 0;
         
         // Add up all the fitnesses
-        for(int i = 0; i < pool_size; ++i)
+        for(int i = 0; i < pool_size; ++i){
+        	hierarchy[i].get_chromosome().calculate_fitness();
+        	if(hierarchy[i].get_chromosome().get_fitness() == 1)
+        		return hierarchy[i].get_chromosome(); // We've found a match, we're done.
+        	
             fitness_pool_size += Math.abs(hierarchy[i].get_chromosome().get_fitness());
+        }
         
         // set up all the percentile sizes
         for(int i = 0; i < pool_size; ++i)
@@ -46,6 +56,7 @@ public class GeneticPool {
                 }
             }
         }
+        return null;
     }
     
     /*
@@ -53,39 +64,41 @@ public class GeneticPool {
      */
     public void evolution(){
         Chromosome t1, t2;
-
-        //grab two random Chromosomes, for evolution
-        t1 = get_chromosome(null);
-        t2 = get_chromosome(t1);
+        Chromosome king; // A Chromosome with fitness == 1
+        while((king = establish_heirarchy()) == null){
+	        //grab two random Chromosomes, for evolution
+	        t1 = get_chromosome(null);
+	        t2 = get_chromosome(t1);
+	        
+	        if(Math.random() < cross_over_rate){
+	            int i = (int)Math.floor(Math.random() * Chromosome.get_strand_size()); // Pick a Gene to cross over with
+	            int j = (int)Math.floor(Math.random() * 4); // Pick a bit to cross over
+	            Gene.swap_bits_at(t1.get_gene(i), t2.get_gene(i), j);
+	            for(int k = ++i; k < Chromosome.get_strand_size(); ++k){
+	                Gene.swap_bits_at(t1.get_gene(k), t2.get_gene(k), 0);
+	            }
+	        }
+	        
+	        for(int i = 0; i < Chromosome.get_strand_size(); ++i){
+	            for(int j = 0; j < 4; ++j){
+	                if(Math.random() <= mutation_rate){
+	                    t1.get_gene(i).flip_bit(j);
+	                }
+	                if(Math.random() <= mutation_rate){
+	                    t2.get_gene(i).flip_bit(j);
+	                }
+	            } // End bit loop
+	        } // End Gene loop
+        } // End While loop
         
-        if(Math.random() < cross_over_rate){
-            int i = (int)Math.floor(Math.random() * Chromosome.get_strand_size());
-            int j = (int)Math.floor(Math.random() * 4);
-            Gene.swap_bits_at(t1.get_gene(i), t2.get_gene(i), j);
-            System.out.println("Crossover beginning in gene " + i + " bit " + j);;
-            for(int k = ++i; k < Chromosome.get_strand_size(); ++k){
-                Gene.swap_bits_at(t1.get_gene(k), t2.get_gene(k), 0);
-            }
-        }
+        System.out.println("The king is: ");
+        System.out.println(king.get_chromosome_string());
+        System.out.println("Value: " + king.recursive_solve());
         
-        for(int i = 0; i < Chromosome.get_strand_size(); ++i){
-            for(int j = 0; j < 4; ++j){
-                if(Math.random() <= mutation_rate){
-                    t1.get_gene(i).flip_bit(j);
-                    System.out.println("t1 has mutated in gene " + i + " bit " + j);
-                }
-                if(Math.random() <= mutation_rate){
-                    t2.get_gene(i).flip_bit(j);
-                    System.out.println("t2 has mutated in gene " + i + " bit " + j);
-                }
-            }
-        }
-        
-    }
+    } // End evolution
     
     protected Chromosome get_chromosome(Chromosome in){
         double temp_precent = Math.random() * 100; // Random percentile number
-        System.out.println("t is " + temp_precent);
         int i;
         double sum = 0;
         
@@ -93,15 +106,12 @@ public class GeneticPool {
         for(i = 0; temp_precent > 0 && i < pool_size; ++i){
             temp_precent -= hierarchy[i].percent;
             sum += hierarchy[i].percent;
-            System.out.println(i + ". " + hierarchy[i].percent + "%");
         
         }
         --i; //i needs to be corrected
-        System.out.println("Sum is " + sum);
-        System.out.println(" index " + i + "is selected with t "+ temp_precent + " as result");
         
         if(in == hierarchy[i].get_chromosome()){
-            return get_chromosome(in);
+            return hierarchy[i+1].get_chromosome();
         }
         return hierarchy[i].get_chromosome();
     }
