@@ -1,8 +1,9 @@
+#IntroGeneticAlgorithm
+
 This is an intro level Genetic Algorithm written for the purposes of learning.
 
-Currently, the is only partially working.
+This program generates a pool of Chromosomes each with a random strand of Genes.
 
-Required:
- - Properly weighted selection algorithm.
- - Full loop process needs to written.
- - Detection of fitness score = 1, as this is a solution
+Each gene represents either a number(0 to 9), a math operationg (+-*/) or a space (meaning nothing).  It then goes through an evolution process until one of the Chromosomes comes up with the target solution.
+
+The solution it finds will not be the most efficient solution.
